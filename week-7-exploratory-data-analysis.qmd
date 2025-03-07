@@ -1,5 +1,6 @@
 ---
 title: "Exploratory Data Analysis"
+author: "Cherie Wang"
 format: html
 execute: 
   echo: true
