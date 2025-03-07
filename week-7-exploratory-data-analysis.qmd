@@ -27,7 +27,8 @@ babynames <- read_csv("babynames_500.csv")
 
 babynames |> 
   summarize(total = sum(n),
-            max = max(n))
+            max = max(n),
+            min_year = min(year))
 ```
 
 
@@ -43,10 +44,10 @@ Complete the code below to extract the rows where `name == "Lincoln"`. Then use 
 ```{r}
 #| label: popularity-lincoln
 
-babynames ___ 
-  filter(_______________________) ___
-  ___________(total = ________, 
-              first = _______)
+babynames |>
+  filter(name == "Lincoln") |> 
+  summarize(total = sum(n), 
+              first = min(n))
 ```
 
 
@@ -115,7 +116,7 @@ pollution |>
 #| label: summarize-city-pollution
 
 pollution |> 
-  group_by(city) |> #only new line of code
+  group_by(size) |> #only new line of code
   summarize(mean = mean(amount),
             sum = sum(amount),
             n = n())
@@ -140,15 +141,30 @@ babynames |>
 Use `group_by()`, `summarise()`, and `arrange()` to display the ten most popular names. Compute popularity as the *total* number of children of a single gender given a name.
 
 *(Hint: Be sure to remove each `_` before running the code)*
+```{r}
+top_10 <- babynames |> 
+  filter(year >= 2005) |> 
+  group_by(name, sex) |>  
+  summarise(total = sum(n)) |> 
+  arrange(desc(total)) |> 
+  head(10) 
+```
 
 ```{r}
 #| label: top-10-names
 
-babynames |> 
-  _______(name, sex) |>  
-  _______(total = _____(n)) |> 
-  _______(desc(_____)) |> 
-  head(10)
+top_10 |> 
+  ggplot(mapping = aes(x = fct_reorder(name, 
+                                       desc(total)),
+                       y = total, 
+                       fill = sex)) + 
+  geom_col() + 
+  scale_fill_brewer() +
+  theme_light() +
+  labs(x = "Top 10 Popular Names in Top 500 in US",
+       y = "Total Number of Infants Born in Top 500",
+       fill = "sex",
+       title = "Names Since 2005")
 ```
 
 
@@ -164,7 +180,7 @@ Use `mutate()` to create NEW columns/variables within your data set.
 
 babynames |> 
   mutate(percent = round(prop*100, 2)) |> 
-  relocate(percent, .before = proportion)
+  relocate(percent, .before = n)
 ```
 ```{r}
 #| label: percent-2-baby
@@ -187,8 +203,8 @@ Rank each name _within its year and sex_.
 
 babynames |> 
   select(name, year, sex, prop) |> 
-  group_by(____, ____) |> 
-  ______(rank = min_rank(____(prop))) |> 
+  group_by(year, sex) |> 
+  mutate(rank = min_rank(desc(prop))) |> 
   arrange(year, sex, rank)
 ```
 
